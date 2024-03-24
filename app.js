@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 /* Mongoose connection */
 mongoose.connect(process.env.MONGO_DB_URI)
-	.then(() => console.log('MongoDB Connected ...'))
+	.then(() => console.log('> MongoDB Connected ...'))
 	.catch((err) => console.log(`Error occured while connecting to Mongo DB. ${err}`));
 
 /* Middlewares */
@@ -34,4 +34,4 @@ app.use(express.static(path.resolve('./public')));
 /* Routes */
 app.use('/api/v1/auth', require('./routes/auth.route'));
 
-server.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT} ...`));
+server.listen(process.env.PORT, () => console.log(`> Server is running on port ${process.env.PORT} ...`));
