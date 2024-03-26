@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { handleSignup, handleSignin } = require('../controllers/auth.controller');
+const { handleUserSignup, handleUserSignin, handleGetUserProfile } = require('../controllers/auth.controller');
+const { ensureAuthenticated } = require('../middlewares/auth.moddleware');
 
-router.post('/signup', handleSignup);
-router.post('/signin', handleSignin);
+router.post('/signup', handleUserSignup);
+router.post('/signin', handleUserSignin);
+router.get('/profile', ensureAuthenticated(['user']), handleGetUserProfile);
 
 module.exports = router;

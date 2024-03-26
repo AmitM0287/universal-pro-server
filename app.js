@@ -3,6 +3,8 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const { authenticationMiddleware } = require('./middlewares/auth.moddleware');
+const authRoutes = require('./routes/auth.route');
 
 /* Dotenv */
 require('dotenv').config();
@@ -30,8 +32,11 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 app.use(express.static(path.resolve('./public')));
+app.use(authenticationMiddleware());
 
 /* Routes */
-app.use('/api/v1/auth', require('./routes/auth.route'));
+app.use('/api/v1/auth', authRoutes);
 
-server.listen(process.env.PORT, () => console.log(`> Server is running on port ${process.env.PORT} ...`));
+server.listen(process.env.PORT, () => 
+	console.log(`> Server is running on port ${process.env.PORT} ...`)
+);

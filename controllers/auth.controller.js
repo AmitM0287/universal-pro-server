@@ -1,7 +1,7 @@
 const { validateSignupPayload, validateSigninPayload, generateHash, generateToken } = require('../lib/auth.lib');
 const { User } = require('../models/auth.model');
 
-const handleSignup = async (req, res) => {
+const handleUserSignup = async (req, res) => {
 	const safeParseResult = validateSignupPayload(req.body);
 	if (safeParseResult.error) {
 		return res.status(400).json({
@@ -32,7 +32,7 @@ const handleSignup = async (req, res) => {
 	}
 };
 
-const handleSignin = async (req, res) => {
+const handleUserSignin = async (req, res) => {
 	const safeParseResult = validateSigninPayload(req.body);
 	if (safeParseResult.error) {
 		return res.status(400).json({
@@ -65,4 +65,26 @@ const handleSignin = async (req, res) => {
 	});
 };
 
-module.exports = { handleSignup, handleSignin };
+const handleGetUserProfile = async (req, res) => {
+	const user = req.user;
+	if (!user) {
+		res.json({
+			status: 'error',
+			error: 'User profile retrieved successfully!',
+			data: null
+		});
+	}
+	const userInDb = await User.findById(user._id);
+	return res.json({
+		status: 'success',
+		message: 'User profile retrieved successfully!',
+		data: {
+			firstName: userInDb.firstName,
+			lastName: userInDb.lastName,
+			email: userInDb.email,
+			role: userInDb.role
+		}
+	});
+};
+
+module.exports = { handleUserSignup, handleUserSignin, handleGetUserProfile };
