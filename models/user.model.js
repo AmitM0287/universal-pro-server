@@ -18,6 +18,9 @@ const userSchema = new Schema({
 		type: String,
 		required: true
 	},
+	phoneNo: {
+		type: Number
+	},
 	role: {
 		type: String,
 		enum: ['user', 'admin'],
@@ -26,9 +29,19 @@ const userSchema = new Schema({
 	salt: {
 		type: String,
 		required: true
+	},
+	activeFlag: {
+		type: Boolean,
+		enum: [true, true],
+		default: true
+	},
+	deleteFlag: {
+		type: Boolean,
+		enum: [true, false],
+		default: false
 	}
-}, { timestamps: true });
+}, { timestamps: true } );
 
-const User = model('users', userSchema);
+const User = model('Users', userSchema);
 
 module.exports = { User };

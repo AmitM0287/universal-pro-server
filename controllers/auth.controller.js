@@ -1,5 +1,5 @@
 const { validateSignupPayload, validateSigninPayload, generateHash, generateToken } = require('../lib/auth.lib');
-const { User } = require('../models/auth.model');
+const { User } = require('../models/user.model');
 
 const handleUserSignup = async (req, res) => {
 	const safeParseResult = validateSignupPayload(req.body);
@@ -25,6 +25,7 @@ const handleUserSignup = async (req, res) => {
 	} catch (err) {
 		if (err.code === 11000) 
 			res.status(400).json({ message: `User with email ${email} already exists!` });
+		console.log(`[handleUserSignup] ${err}`);
 		res.status(500).json({
 			status: 'error',
 			error: 'Internal server error!'
@@ -79,6 +80,7 @@ const handleGetUserProfile = async (req, res) => {
 		status: 'success',
 		message: 'User profile retrieved successfully!',
 		data: {
+			_id: user._id,
 			firstName: userInDb.firstName,
 			lastName: userInDb.lastName,
 			email: userInDb.email,

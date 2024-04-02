@@ -5,6 +5,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const { authenticationMiddleware } = require('./middlewares/auth.moddleware');
 const authRoutes = require('./routes/auth.route');
+const userRoutes = require('./routes/user.route');
 
 /* Dotenv */
 require('dotenv').config();
@@ -36,7 +37,8 @@ app.use(authenticationMiddleware());
 
 /* Routes */
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/user', userRoutes);
 
-server.listen(process.env.PORT, () => 
-	console.log(`> Server is running on port ${process.env.PORT} ...`)
-);
+server.listen(process.env.PORT, () => {
+	console.log(`> Server is running on port ${process.env.PORT} ...`);
+});
