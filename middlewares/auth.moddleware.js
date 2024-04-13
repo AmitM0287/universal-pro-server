@@ -1,4 +1,4 @@
-const { validateToken } = require('../lib/auth.lib');
+const { validateUserToken } = require('../lib/auth.lib');
 
 const authenticationMiddleware = () => (req, res, next) => {
 	const authHeader = req.headers['Authorization'] ?? req.headers['authorization'];
@@ -6,9 +6,10 @@ const authenticationMiddleware = () => (req, res, next) => {
 		const headerSplit = authHeader.split('Bearer ');
 		if (headerSplit.length === 2) {
 			const token = headerSplit[1];
-			const validateTokenResult = validateToken(token);
-			if (validateTokenResult)
+			const validateTokenResult = validateUserToken(token);
+			if (validateTokenResult) {
 				req.user = validateTokenResult;
+			}
 		}
 	}
 	next();
@@ -16,14 +17,15 @@ const authenticationMiddleware = () => (req, res, next) => {
 
 const ensureAuthenticated = (allowedRoles = null) => (req, res, next) => {
 	const user = req.user;
-	if (!user)
+	if (!user) {
 		return res.status(401).json({
 			status: 'error',
 			error: 'Unauthenticated'
 		});
+	}
 	if (!allowedRoles) return next();
 	if (!allowedRoles.includes(user.role)) 
-		return res.json({
+		return res.status(401).json({
 			status: 'error',
 			error: 'Access denied'
 		});

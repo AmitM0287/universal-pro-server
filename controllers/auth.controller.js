@@ -1,40 +1,8 @@
-const { validateSignupPayload, validateSigninPayload, generateHash, generateToken } = require('../lib/auth.lib');
-const { User } = require('../models/user.model');
+const { validateUserLoginPayload, validateUserRegisterPayload, generateHash, generateUserToken } = require('../lib/auth.lib');
+const { AuthUser } = require('../models/auth.model');
 
-const handleUserSignup = async (req, res) => {
-	const safeParseResult = validateSignupPayload(req.body);
-	if (safeParseResult.error) {
-		return res.status(400).json({
-			status: 'error',
-			error: safeParseResult.error
-		});
-	}
-	const { firstName, lastName, email, password } = safeParseResult.data;
-	try {
-		const { hash: hashedPassword, salt } = generateHash(password);
-		const createUserResult = await User.create({ firstName, lastName, email, password: hashedPassword, salt });
-		const token = generateToken({ _id: createUserResult._id.toString(), role: createUserResult.role });
-		return res.status(201).json({ 
-			status: 'success', 
-			message: 'User created successfully!', 
-			data: { 
-				_id: createUserResult._id,
-				token: token
-			} 
-		});
-	} catch (err) {
-		if (err.code === 11000) 
-			res.status(400).json({ message: `User with email ${email} already exists!` });
-		console.log(`[handleUserSignup] ${err}`);
-		res.status(500).json({
-			status: 'error',
-			error: 'Internal server error!'
-		});
-	}
-};
-
-const handleUserSignin = async (req, res) => {
-	const safeParseResult = validateSigninPayload(req.body);
+const handleUserLogin = async (req, res) => {
+	const safeParseResult = validateUserLoginPayload(req.body);
 	if (safeParseResult.error) {
 		return res.status(400).json({
 			status: 'error',
@@ -42,7 +10,7 @@ const handleUserSignin = async (req, res) => {
 		});
 	}
 	const { email, password } = safeParseResult.data;
-	const userInDb = await User.findOne({ email });
+	const userInDb = await AuthUser.findOne({ email });
 	if (!userInDb) {
 		return res.status(404).json({
 			status: 'error',
@@ -56,7 +24,7 @@ const handleUserSignin = async (req, res) => {
 			error: 'Incorrect user email or password!'
 		});
 	}
-	const token = generateToken({ _id: userInDb._id.toString(), role: userInDb.role });
+	const token = generateUserToken({ _id: userInDb._id.toString(), role: userInDb.role });
 	return res.status(200).json({
 		status: 'success',
 		message: 'User authenticated successfully!',
@@ -66,17 +34,52 @@ const handleUserSignin = async (req, res) => {
 	});
 };
 
+const handleUserRegister = async (req, res) => {
+	const safeParseResult = validateUserRegisterPayload(req.body);
+	if (safeParseResult.error) {
+		return res.status(400).json({
+			status: 'error',
+			error: safeParseResult.error
+		});
+	}
+	const { firstName, lastName, email, password } = safeParseResult.data;
+	try {
+		const { hash: hashedPassword, salt } = generateHash(password);
+		const createUserResult = await AuthUser.create({ firstName, lastName, email, password: hashedPassword, salt });
+		const token = generateUserToken({ _id: createUserResult._id.toString(), role: createUserResult.role });
+		return res.status(201).json({ 
+			status: 'success', 
+			message: 'User created successfully!', 
+			data: { 
+				_id: createUserResult._id,
+				token: token
+			} 
+		});
+	} catch (err) {
+		if (err.code === 11000) {
+			return res.status(400).json({ 
+				status: 'error',
+				message: `User with email ${email} already exists!` 
+			});
+		}
+		console.log(`[handleUserRegister] ${err}`);
+		return res.status(500).json({
+			status: 'error',
+			error: 'Internal server error!'
+		});
+	}
+};
+
 const handleGetUserProfile = async (req, res) => {
 	const user = req.user;
 	if (!user) {
-		res.json({
+		res.status(400).json({
 			status: 'error',
-			error: 'User profile retrieved successfully!',
-			data: null
+			error: 'User doesn\'t not exists!',
 		});
 	}
-	const userInDb = await User.findById(user._id);
-	return res.json({
+	const userInDb = await AuthUser.findById(user._id);
+	return res.status(200).json({
 		status: 'success',
 		message: 'User profile retrieved successfully!',
 		data: {
@@ -89,4 +92,4 @@ const handleGetUserProfile = async (req, res) => {
 	});
 };
 
-module.exports = { handleUserSignup, handleUserSignin, handleGetUserProfile };
+module.exports = { handleUserLogin, handleUserRegister, handleGetUserProfile };
