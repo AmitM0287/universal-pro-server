@@ -34,7 +34,7 @@ app.use(express.static(path.resolve('./public')));
 app.use(authenticationMiddleware());
 
 /* routes */
-app.use('/api/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 
 /* server listening */
 server.listen(process.env.PORT, () => {

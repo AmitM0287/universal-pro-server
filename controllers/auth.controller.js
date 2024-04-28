@@ -1,5 +1,5 @@
 const { validateUserLoginPayload, validateUserRegisterPayload, generateHash, generateUserToken } = require('../lib/auth.lib');
-const { AuthUser } = require('../models/auth.model');
+const { Users } = require('../models/auth.model');
 
 const handleUserLogin = async (req, res) => {
 	const safeParseResult = validateUserLoginPayload(req.body);
@@ -10,7 +10,7 @@ const handleUserLogin = async (req, res) => {
 		});
 	}
 	const { email, password } = safeParseResult.data;
-	const userInDb = await AuthUser.findOne({ email });
+	const userInDb = await Users.findOne({ email });
 	if (!userInDb) {
 		return res.status(404).json({
 			status: 'error',
@@ -45,7 +45,7 @@ const handleUserRegister = async (req, res) => {
 	const { firstName, lastName, email, password } = safeParseResult.data;
 	try {
 		const { hash: hashedPassword, salt } = generateHash(password);
-		const createUserResult = await AuthUser.create({ firstName, lastName, email, password: hashedPassword, salt });
+		const createUserResult = await Users.create({ firstName, lastName, email, password: hashedPassword, salt });
 		const token = generateUserToken({ _id: createUserResult._id.toString(), role: createUserResult.role });
 		return res.status(201).json({ 
 			status: 'success', 
@@ -78,7 +78,7 @@ const handleGetUserProfile = async (req, res) => {
 			error: 'User doesn\'t not exists!',
 		});
 	}
-	const userInDb = await AuthUser.findById(user._id);
+	const userInDb = await Users.findById(user._id);
 	return res.status(200).json({
 		status: 'success',
 		message: 'User profile retrieved successfully!',
