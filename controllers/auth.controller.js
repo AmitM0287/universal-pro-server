@@ -6,6 +6,7 @@ const handleUserLogin = async (req, res) => {
 	if (safeParseResult.error) {
 		return res.status(400).json({
 			status: 'error',
+			message: 'User login payload validation failed!',
 			error: safeParseResult.error
 		});
 	}
@@ -14,14 +15,16 @@ const handleUserLogin = async (req, res) => {
 	if (!userInDb) {
 		return res.status(404).json({
 			status: 'error',
-			error: `User with email ${email} doesn't exists!`
+			message: `User with email ${email} doesn't exists!`,
+			error: []
 		});
 	}
 	const { hash } = generateHash(password, userInDb.salt);
 	if (hash !== userInDb.password) {
 		return res.status(400).json({
 			status: 'error',
-			error: 'Incorrect user email or password!'
+			message: 'Incorrect user email or password!',
+			error: []
 		});
 	}
 	const token = generateUserToken({ _id: userInDb._id.toString(), role: userInDb.role });
@@ -39,6 +42,7 @@ const handleUserRegister = async (req, res) => {
 	if (safeParseResult.error) {
 		return res.status(400).json({
 			status: 'error',
+			message: 'User register payload validation failed!',
 			error: safeParseResult.error
 		});
 	}
@@ -59,13 +63,15 @@ const handleUserRegister = async (req, res) => {
 		if (err.code === 11000) {
 			return res.status(400).json({ 
 				status: 'error',
-				message: `User with email ${email} already exists!` 
+				message: `User with email ${email} already exists!` ,
+				error: []
 			});
 		}
 		console.log(`[handleUserRegister] ${err}`);
 		return res.status(500).json({
 			status: 'error',
-			error: 'Internal server error!'
+			message: 'Internal server error!',
+			error: []
 		});
 	}
 };
@@ -75,7 +81,8 @@ const handleGetUserProfile = async (req, res) => {
 	if (!user) {
 		res.status(400).json({
 			status: 'error',
-			error: 'User doesn\'t not exists!',
+			message: 'User doesn\'t not exists!',
+			error: []
 		});
 	}
 	const userInDb = await Users.findById(user._id);

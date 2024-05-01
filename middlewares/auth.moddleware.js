@@ -20,14 +20,16 @@ const ensureAuthenticated = (allowedRoles = null) => (req, res, next) => {
 	if (!user) {
 		return res.status(401).json({
 			status: 'error',
-			error: 'Unauthenticated'
+			message: 'Unauthenticated',
+			error: []
 		});
 	}
 	if (!allowedRoles) return next();
 	if (!allowedRoles.includes(user.role)) 
 		return res.status(401).json({
 			status: 'error',
-			error: 'Access denied'
+			message: 'Access denied',
+			error: []
 		});
 	next();
 };
